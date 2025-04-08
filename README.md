@@ -34,4 +34,5 @@ go mod tidy
 ## tag v0.0.1
 go test -v -run TestGetAccountBalance
 
-## 
+## Licence
+MIT License - see LICENSE for more details
