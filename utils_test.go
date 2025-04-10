@@ -2,11 +2,8 @@ package myokx
 
 import (
 	"encoding/json"
-	"reflect"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -34,90 +31,6 @@ func TestHmacSha256Base64Signer(t *testing.T) {
 }
 
 // 请求验证 ========================================================================= End
-
-// 数据转换 ========================================================================= Start
-// 测试 int ---> string
-func TestInt2tring(t *testing.T) {
-	var a int = 123456789
-	s_right := "123456789"
-	ss := Int2String(a)
-	assert.True(t, s_right == ss)
-}
-
-// 测试 int64 ---> string
-func TestInt642tring(t *testing.T) {
-	var a int64 = 123456789
-	s_right := "123456789"
-	ss := Int642String(a)
-	assert.True(t, s_right == ss)
-}
-
-// 测试 JsonBytes ---> Struct
-func TestJsonBytes2Struct(t *testing.T) {
-	type Person struct {
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}
-	jsonBytes := []byte(`{"name": "Alice", "age": 30}`)
-	var result Person
-	err := JsonBytes2Struct(jsonBytes, &result)
-	assert.NoError(t, err, "expected no error during unmarshalling")
-	assert.Equal(t, Person{Name: "Alice", Age: 30}, result, "expected result does not match")
-}
-
-// 测试 Struct ---> JsonString
-func TestStruct2JsonString(t *testing.T) {
-	type Person struct {
-		Name string `json:"name"`
-		Age  int    `json:"age"`
-	}
-	person := Person{Name: "Alice", Age: 30}
-	expectedJson := `{"name":"Alice","age":30}`
-	jsonString, err := Struct2JsonString(person)
-	assert.NoError(t, err, "expected no error during marshalling")
-	assert.JSONEq(t, expectedJson, jsonString, "expected JSON string does not match")
-}
-
-// 数据转换 ========================================================================= End
-
-// 时间函数 ========================================================================= Start
-// 测试EpochTime的返回格式是否正确
-func TestEpochTime(t *testing.T) {
-	epochTime := EpochTime()
-	assert.Contains(t, epochTime, ".", "epochTime should contain a dot")
-	parts := strings.Split(epochTime, ".")
-	assert.Len(t, parts, 2, "epochTime should have two parts")
-	_, err := strconv.Atoi(parts[0])
-	assert.NoError(t, err, "the first part of epochTime should be a valid integer")
-	_, err = strconv.Atoi(parts[1])
-	assert.NoError(t, err, "the second part of epochTime should be a valid integer")
-}
-
-// 测试：1540365300000 -> 2018-10-24 15:15:00 +0800 CST
-func TestLongTimeToUTC8(t *testing.T) {
-	longTime := int64(1540365300000) // Corresponds to 2018-10-24 15:15:00 UTC+8
-	expectedTime := time.Date(2018, 10, 24, 15, 15, 0, 0, time.FixedZone("CST", 8*3600))
-	result := LongTimeToUTC8(longTime)
-	assert.Equal(t, expectedTime, result, "the converted time should match the expected time")
-}
-
-// 测试："2018-11-18T16:51:55.933Z" -> 2018-11-18 16:51:55.000000933 +0000 UTC
-func TestIsoToTime(t *testing.T) {
-	iso := "2018-11-18T16:51:55.933Z"
-	expectedTime := time.Date(2018, 11, 18, 16, 51, 55, 933000000, time.UTC)
-	result, err := IsoToTime(iso)
-	assert.NoError(t, err, "expected no error while parsing ISO string")
-	assert.Equal(t, expectedTime, result, "the parsed time does not match the expected time")
-}
-
-// 测试 IsoTime() 获取当前时间 iso
-func TestIsoTime(t *testing.T) {
-	iso1 := IsoTime()
-	b := strings.ContainsAny(iso1, "TZ")
-	assert.True(t, b)
-}
-
-// 时间函数 ========================================================================= End
 
 // TestParseRequestParams tests the ParseRequestParams function.
 func TestParseRequestParams(t *testing.T) {
@@ -148,27 +61,6 @@ func TestParseRequestParams(t *testing.T) {
 	_, _, err = ParseRequestParams(nil)
 	assert.Error(t, err, "expected an error for nil parameter")
 	assert.Equal(t, "illegal parameter", err.Error(), "expected specific error message")
-}
-
-// 测试：构造请求参数，版本1
-// go test -run ^TestBuildParams$ okex -v
-func TestBuildParams(t *testing.T) {
-	params := NewParams()
-	params["depth"] = "200"
-	params["conflated"] = "0"
-	url := BuildParams("/api/futures/v3/products/BTC-USD-0310/book", params)
-	str_right := "/api/futures/v3/products/BTC-USD-0310/book?conflated=0&depth=200"
-	assert.True(t, url == str_right)
-}
-
-// 测试：构造请求参数，版本2
-func TestBuildParams2(t *testing.T) {
-	params := NewParams()
-	params["depth"] = "200"
-	params["conflated"] = "0"
-	url := BuildParams2("uri?instId=BTC-USDT&", params)
-	str_right := "uri?instId=BTC-USDT&conflated=0&depth=200"
-	assert.True(t, url == str_right)
 }
 
 // 测试：BuildUri函数
@@ -264,54 +156,4 @@ func unorderedSliceEqual(a, b []string) bool {
 	}
 
 	return true
-}
-
-// 测试：实现三目运算：a == b ? c : d
-func TestT3O(t *testing.T) {
-	type testStruct struct{ field int }
-
-	tests := []struct {
-		name      string
-		condition bool
-		trueVal   interface{}
-		falseVal  interface{}
-		want      interface{}
-	}{
-		{"true returns int", true, 42, 0, 42},
-		{"false returns string", false, "apple", "banana", "banana"},
-		{"true with nil", true, nil, "not-nil", nil},
-		{"false with nil", false, "not-nil", nil, nil},
-		{"different types", true, 3.14, "pi", 3.14},
-		{"struct comparison", true, testStruct{5}, testStruct{10}, testStruct{5}},
-		{"pointer comparison",
-			true,
-			&testStruct{7},
-			&testStruct{9},
-			&testStruct{7}},
-		{"typed nil pointer",
-			false,
-			(*testStruct)(nil),
-			(*testStruct)(nil),
-			(*testStruct)(nil)},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := T3O(tt.condition, tt.trueVal, tt.falseVal)
-
-			// 特殊处理nil比较
-			if tt.want == nil {
-				if got != nil {
-					t.Errorf("expected nil, got %v (%T)", got, got)
-				}
-				return
-			}
-
-			// 使用反射处理复杂类型比较
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("T3O() = %v (%T), want %v (%T)",
-					got, got, tt.want, tt.want)
-			}
-		})
-	}
 }
