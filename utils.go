@@ -121,3 +121,51 @@ func GetResponsePageJsonString(response *http.Response) string {
 }
 
 // Http 函数 ======================================================================== End.
+
+// Cal Price  ======================================================================== Start:
+// 根据持仓均价、收益率、方向、fee_open、fee_close，计算平仓价格
+func CalCloseStrPx(p *Positions, goal, fee_open, fee_close float64) string {
+	fOpen := myfun.StringToFloat64(p.AvgPx)
+	var direct float64
+	if p.PosSide == "long" {
+		direct = 1
+	} else {
+		direct = -1
+	}
+	rf := fOpen * (goal + direct + fee_open) / (direct - fee_close)
+	tickSz := GetTickSzQuick(p.InstId)
+	if tickSz == "" {
+		tickSz = p.AvgPx
+	}
+	return myfun.Float64ToString(rf, myfun.CountStrFloat(tickSz))
+}
+
+// 快速获取交易价格精度
+func GetTickSzQuick(id1 string) string {
+	if id1 == "DOGE-USDT-SWAP" {
+		return "0.00001"
+	} else if id1 == "ETH-USDT-SWAP" {
+		return "0.01"
+	} else if id1 == "BTC-USDT-SWAP" {
+		return "0.1"
+	} else if id1 == "TRUMP-USDT-SWAP" {
+		return "0.001"
+	} else {
+		return GetTickSzFromJson("account-instruments.json", id1)
+	}
+}
+
+// 获取下单价格精度，从本地文件
+func GetTickSzFromJson(filename, instId string) string {
+	var a AccountInstrumentsResult
+	myfun.ReadJSONFile(filename, &a)
+	ticksz := ""
+	for i := range len(a.Data) {
+		if instId == a.Data[i].InstId {
+			ticksz = a.Data[i].TickSz
+		}
+	}
+	return ticksz
+}
+
+// Cal Price  ======================================================================== End.

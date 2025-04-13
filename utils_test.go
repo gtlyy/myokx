@@ -157,3 +157,12 @@ func unorderedSliceEqual(a, b []string) bool {
 
 	return true
 }
+
+// 测试：从本地json文件，获取交易产品的信息，比如交易价格精度
+func TestGetTickSzFromJson(t *testing.T) {
+	ticksz := ""
+	instId := "DOGE-USDT-SWAP"
+	filename := "account-instruments.json"
+	ticksz = GetTickSzFromJson(filename, instId)
+	assert.True(t, ticksz == "0.00001")
+}
