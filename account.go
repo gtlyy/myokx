@@ -1,5 +1,9 @@
 package myokx
 
+import (
+	"github.com/gtlyy/myfun"
+)
+
 // 查看交易账户中资金余额信息
 func (client *Client) GetAccountBalance(ccy string) (r AccountBalanceResult, err error) {
 	uri := ACCOUNT_BALANCE
@@ -19,6 +23,15 @@ func (client *Client) GetAccountInstruments(params map[string]string) (r Account
 		return AccountInstrumentsResult{}, err
 	}
 	return r, err
+}
+
+// 将获取的可交易产品信息并写入json文件，如写入 account-instruments.json
+func (client *Client) GetAndWriteAccountInstruments(instType, filename string) {
+	p := NewParams()
+	p["instType"] = instType
+	r, err := client.GetAccountInstruments(p)
+	myfun.IfError("Error:Get,Write account-instruments.", err)
+	myfun.WriteJSONFile(filename, r)
 }
 
 // 查看持仓信息
