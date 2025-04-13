@@ -1,4 +1,4 @@
-module myokx
+module github.com/gtlyy/myokx
 
 go 1.23.0
 
