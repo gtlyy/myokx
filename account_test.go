@@ -48,7 +48,7 @@ func TestGetPositionsType(t *testing.T) {
 	p["instType"] = "SWAP"
 	r, err := c.GetPositions(p)
 	assert.True(t, err == nil)
-	t.Log("Id， 持仓量， 开仓均价，最新价， 浮盈（亏），盈亏率")
+	fmt.Println("Id             持仓量        开仓均价    最新价     浮盈（亏）      盈亏率")
 	for _, v := range r.Data {
 		fmt.Println(v.InstId, v.AvailPos, v.AvgPx, v.Last, v.Upl, v.UplRatio)
 	}
