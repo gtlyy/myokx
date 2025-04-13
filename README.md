@@ -31,7 +31,7 @@ go mod tidy
 }
 ```
 
-## tag v0.0.1
+## test
 go test -v -run TestGetAccountBalance
 
 ## Licence
