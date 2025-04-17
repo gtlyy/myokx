@@ -168,4 +168,17 @@ func GetTickSzFromJson(filename, instId string) string {
 	return ticksz
 }
 
+// 获取合约面值，从本地文件
+func GetctValFromJson(filename, instId string) string {
+	var a AccountInstrumentsResult
+	myfun.ReadJSONFile(filename, &a)
+	ctVal := ""
+	for i := range len(a.Data) {
+		if instId == a.Data[i].InstId {
+			ctVal = a.Data[i].CtVal
+		}
+	}
+	return ctVal
+}
+
 // Cal Price  ======================================================================== End.
