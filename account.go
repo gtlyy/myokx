@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// 获取当前账户可交易产品的信息列表
+// 获取当前账户可交易产品的信息
 func (client *Client) GetAccountInstruments(params map[string]string) (r AccountInstrumentsResult, err error) {
 	uri := BuildUri(ACCOUNT_INSTRUMENTS, "", params)
 	if _, err = client.Request(GET, uri, nil, &r); err != nil {

@@ -18,16 +18,20 @@ import (
 
 // 设置函数别名，方便打字
 var (
-	ISONow            = mytime.ISONow
-	ISOCSTToTs        = mytime.ISOCSTToTs
+	ISONow     = mytime.ISONow
+	ISOCSTToTs = mytime.ISOCSTToTs
+	TsToISOCST = mytime.TsToISOCST
+
 	IntToString       = myfun.IntToString
 	StringToFloat64   = myfun.StringToFloat64
 	Float64ToString   = myfun.Float64ToString
 	JsonBytes2Struct  = myfun.JsonBytes2Struct
 	Struct2JsonString = myfun.Struct2JsonString
-	WriteJSONFile     = myfun.WriteJSONFile
-	ReadJSONFile      = myfun.ReadJSONFile
-	IfError           = myfun.IfError
+
+	WriteJSONFile = myfun.WriteJSONFile
+	ReadJSONFile  = myfun.ReadJSONFile
+
+	IfError = myfun.IfError
 )
 
 // 请求验证 ========================================================================= Start

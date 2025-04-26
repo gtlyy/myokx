@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// 测试：获取当前账户可交易产品的信息列表
+// 测试：获取当前账户可交易产品的信息
 func TestGetAccountInstruments(t *testing.T) {
 	p := NewParams()
 	p["instType"] = "SWAP"
