@@ -8,9 +8,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gtlyy/myfun"
 	"github.com/gtlyy/mytime"
@@ -19,11 +22,14 @@ import (
 // 设置函数别名，方便打字
 var (
 	ISONow     = mytime.ISONow
+	TsNow      = mytime.TsNow
 	ISOCSTToTs = mytime.ISOCSTToTs
 	TsToISOCST = mytime.TsToISOCST
 
 	IntToString       = myfun.IntToString
+	Int64ToString     = myfun.Int64ToString
 	StringToFloat64   = myfun.StringToFloat64
+	StringToInt64     = myfun.StringToInt64
 	Float64ToString   = myfun.Float64ToString
 	JsonBytes2Struct  = myfun.JsonBytes2Struct
 	Struct2JsonString = myfun.Struct2JsonString
@@ -151,3 +157,20 @@ func CalCloseStrPx(p *Positions, goal, fee_open, fee_close float64) string {
 }
 
 // Cal Price  ======================================================================== End.
+
+// log =============================================================================== Start:
+// 让log输出达到ms级别，以便更好地测试。
+type logWriter struct{}
+
+func (writer logWriter) Write(bytes []byte) (int, error) {
+	return fmt.Printf("%s %s",
+		time.Now().Format("2006-01-02T15:04:05.000000"), string(bytes))
+}
+
+func SetMyLog() {
+	log.SetFlags(0) // 禁用默认标志
+	log.SetPrefix("")
+	log.SetOutput(new(logWriter)) // 自定义日志输出格式
+}
+
+// log =============================================================================== End.

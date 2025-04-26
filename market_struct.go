@@ -12,13 +12,21 @@ type BaseTickerResult struct {
 	BidPx    string `json:"bidPx"`
 	BidSz    string `json:"bidSz"`
 }
-
 type TickerResult struct {
 	ApiCodeMsg
 	Data []BaseTickerResult `json:"data"`
 }
 
-//
+// 深度数据
+type BooksData struct {
+	Asks [][]string `json:"asks"`
+	Bids [][]string `json:"bids"`
+	Ts   string     `json:"ts"`
+}
+type Books struct {
+	ApiCodeMsg
+	Data []BooksData `json:"data"`
+}
 
 // Kline:
 // 该格式主要用于数据库查询和插入kline
