@@ -18,6 +18,8 @@ type TickerResult struct {
 	Data []BaseTickerResult `json:"data"`
 }
 
+//
+
 // Kline:
 // 该格式主要用于数据库查询和插入kline
 type KlineDataS struct {

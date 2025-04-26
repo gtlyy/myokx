@@ -44,6 +44,8 @@ const (
 	SWAP_HISTORY_FUNDING_RATE = "/api/v5/public/funding-rate-history"
 
 	// 行情数据 market
+	// 获取全部产品行情信息
+	MARKET_TICKERS = "/api/v5/market/tickers"
 	// 获取单个产品行情信息
 	MARKET_TICKER = "/api/v5/market/ticker"
 	// Kline
@@ -52,6 +54,7 @@ const (
 	// books
 	MARKET_BOOKS = "/api/v5/market/books"
 
+	// 交易 trade
 	// 下单、查询订单
 	TRADE_ORDER = "/api/v5/trade/order"
 	// 获取未成交订单

@@ -77,7 +77,7 @@ func (client *Client) Request(method string, requestPath string, params, result 
 	}
 
 	// 生成签名
-	timestamp := IsoTime()
+	timestamp := ISONow()
 	preHash := PreHashString(timestamp, method, requestPath, jsonBody)
 	sign, err := HmacSha256Base64Signer(preHash, config.SecretKey)
 	if err != nil {
@@ -146,7 +146,7 @@ func printRequest(config Config, request *http.Request, body string, preHash str
 	if config.SecretKey != "" {
 		fmt.Println("  Secret-Key: " + config.SecretKey)
 	}
-	fmt.Println("  Request(" + IsoTime() + "):")
+	fmt.Println("  Request(" + ISONow() + "):")
 	fmt.Println("\tUrl: " + request.URL.String())
 	fmt.Println("\tMethod: " + strings.ToUpper(request.Method))
 	if len(request.Header) > 0 {
@@ -166,7 +166,7 @@ func printRequest(config Config, request *http.Request, body string, preHash str
 
 // 打印服务器响应信息
 func printResponse(status int, message string, body []byte) {
-	fmt.Println("  Response(" + IsoTime() + "):")
+	fmt.Println("  Response(" + ISONow() + "):")
 	statusString := strconv.Itoa(status)
 	message = strings.Replace(message, statusString, "", -1)
 	message = strings.Trim(message, " ")
