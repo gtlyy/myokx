@@ -120,7 +120,7 @@ func (client *Client) GetKlinesHistoryPlus1(instId string, params map[string]str
 		params["after"] = tsArray[i][0]
 		uri := BuildUri(MARKET_CANDLES_HISTORY, instId, params)
 		_, err = client.Request(GET, uri, nil, &r)
-		if (i+1)%20 == 0 {
+		if (i+1)%19 == 0 {
 			time.Sleep(time.Second * 2)
 		}
 		ks = append(ks, r.Data...)
@@ -154,7 +154,7 @@ func (client *Client) GetKlinesHistoryPlus2(instId string, params map[string]str
 
 		uri := BuildUri(MARKET_CANDLES_HISTORY, instId, params)
 		_, err = client.Request(GET, uri, nil, &r)
-		if (i+1)%20 == 0 {
+		if (i+1)%19 == 0 {
 			time.Sleep(time.Second * 2)
 		}
 		ks = append(ks, r.Data...)

@@ -317,76 +317,6 @@ func (mydb *MyMariaDBClass) CreateGameData2() (r []KlineDataS) {
 	return r
 }
 
-// 生成测试数据 for tradegame
-func (mydb *MyMariaDBClass) CreateTradeGameData(b string) (r []KlineDataS, name string) {
-	// 定义可选的 id 切片
-	// ids := []string{"DOGE-USDT", "ETC-USDT", "BTC-USDT", "000858SZ"}
-	ids := []string{"000858SZ"}
-
-	// 使用随机数生成索引来选择一个随机的 id
-	rand.Seed(time.Now().UnixNano())
-	randomIndex := rand.Intn(len(ids))
-	id := ids[randomIndex]
-
-	// Big A
-	if id[0] >= '0' && id[0] <= '9' {
-		b = "1D"
-	}
-
-	table := IdAndBarToTable(id, b)
-	n := 720
-	err := mydb.QueryRand(&r, table, n)
-	IfError("Error in createGameData2()", err)
-	name = id
-	return r, name
-}
-
-// 生成测试数据 for tradegame  混合大A和加密币
-// func (mydb *MyMariaDBClass) CreateTradeGameData2(a bool, b bool, bar string) (r []KlineDataS, stock string) {
-// 	// fmt.Println(a, b, bar)
-// 	// A
-// 	// d := make(map[string]string)
-// 	idsA := make([]string, 0)
-// 	for _, v := range GetStockslistCsv() {
-// 		stock1 := v[0]
-// 		// d[stock1] = v[1]
-// 		// name := v[1]
-// 		// date1 := v[2]
-// 		idsA = append(idsA, stock1)
-// 	}
-
-// 	idsB := []string{"DOGE-USDT", "ETC-USDT", "BTC-USDT"}
-// 	idsAll := make([]string, 0)
-// 	if a && b {
-// 		idsAll = append(idsA, idsB...)
-// 	} else if a && !b {
-// 		idsAll = idsA
-// 	} else if !a && b {
-// 		idsAll = idsB
-// 	}
-
-// 	// 使用随机数生成索引来选择一个随机的 id
-// 	rand.Seed(time.Now().UnixNano())
-// 	randomIndex := rand.Intn(len(idsAll))
-// 	id := idsAll[randomIndex]
-
-// 	// Big A
-// 	if id[0] >= '0' && id[0] <= '9' {
-// 		bar = "1D"
-// 	}
-
-// 	// fmt.Println(id, bar)
-// 	stock = id + "-" + bar
-// 	return
-
-// 	// table := IdAndBarToTable(id, bar)
-// 	// n := 720
-// 	// err := mydb.QueryRand(&r, table, n)
-// 	// OnErr("Error in createGameData2()", err)
-// 	// name = id
-// 	// return r, name
-// }
-
 // 获取csv文件内容
 func GetLinesCsv(filename string, passTitle bool) ([][]string, error) {
 	// 打开 CSV 文件
@@ -433,7 +363,7 @@ func (mydb *MyMariaDBClass) CreateTradeGameData3(a bool, b bool, bar string) (r 
 		idsA = append(idsA, stock1)
 	}
 
-	idsB := []string{"DOGE-USDT", "ETC-USDT", "BTC-USDT"}
+	idsB := []string{"DOGE-USDT-SWAP", "ETC-USDT-SWAP", "BTC-USDT-SWAP", "KAITO-USDT-SWAP", "TRUMP-USDT-SWAP"}
 	idsAll := make([]string, 0)
 	if a && b {
 		idsAll = append(idsA, idsB...)

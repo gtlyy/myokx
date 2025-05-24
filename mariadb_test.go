@@ -4,8 +4,6 @@ package myokx
 import (
 	"fmt"
 	"math/rand"
-	"os"
-	"os/signal"
 	"time"
 
 	"github.com/gtlyy/mytime"
@@ -141,34 +139,7 @@ func TestQueryRand(t *testing.T) {
 	assert.True(t, len(r) == n)
 }
 
-// // 测试：获取A股的代码，上海
-// func TestGetStocksList(t *testing.T) {
-// 	stocks := GetStockslist()
-// 	for _, v := range stocks {
-// 		stock := v[0]
-// 		t.Log(stock)
-// 	}
-// }
-
-// // 测试：获取A股的代码，上海
-// func TestCreateTradeGameData2(t *testing.T) {
-// 	// 使用随机数生成索引来选择一个随机的 bar
-// 	bars := []string{"15m", "1H", "1D"}
-// 	rand.Seed(time.Now().UnixNano())
-// 	randomIndex := rand.Intn(len(bars))
-// 	bar := bars[randomIndex]
-
-// 	for i := 0; i < 1000; i++ {
-// 		_, stock := maria.CreateTradeGameData2(true, true, bar)
-// 		if stock[0] >= 'A' && stock[0] <= 'Z' {
-// 			t.Log(i, stock)
-// 			break
-// 		}
-// 	}
-
-// }
-
-// 测试：获取A股的代码，上海。 这个增加：返回股票名称
+// 测试：获取A股的代码，上海。混合大A和加密币。 这个增加：返回股票名称
 func TestCreateTradeGameData3(t *testing.T) {
 	// 使用随机数生成索引来选择一个随机的 bar
 	bars := []string{"15m", "1H", "1D"}
@@ -180,41 +151,13 @@ func TestCreateTradeGameData3(t *testing.T) {
 		r, stock, name := maria.CreateTradeGameData3(true, true, bar)
 		t.Log(i, r[0].C, stock, name)
 	}
-
 }
 
 // 测试：InsertUseIdAndBarSync 增加，通过 id, bar, start, end
+// 功能：可以通过这个测试函数，直接更新数据库。
 func TestInsertUseIdAndBarSyncCh(t *testing.T) {
-	id := "DOGE-USDT-SWAP"
-	bar := "15m"
-	// start := "2025-01-01T13:00:00Z"
+	id := "BTC-USDT-SWAP"
+	bar := "1H"   //15m, 1H, 1D
 	start := "-1" // -1:auto update, or Default: "2021-01-01T00:00:00Z"
-	// table := strings.Replace(id+bar, "-", "", -1)
-	// if !maria.CheckTableExists(table) {
-	// 	maria.CreateTable(table)
-	// }
 	maria.InsertUseIdAndBarSyncCh(c, id, bar, start)
-}
-
-// 测试：InsertUseIdAndBarSync 增加，通过 id, bar, start, end 【多个id】
-func TestInsertUseIdAndBarSyncCh2(t *testing.T) {
-	ids := []string{"DOGE-USDT-SWAP", "TRUMP-USDT-SWAP", "KAITO-USDT-SWAP"}
-	bars := []string{"15m", "1H", "1D"}
-	// start := "2025-03-16T13:00:00Z"
-	start := "-1" // -1:auto update, or Default: "2021-01-01T00:00:00Z"
-	// table := strings.Replace(id+bar, "-", "", -1)
-	// if !maria.CheckTableExists(table) {
-	// 	maria.CreateTable(table)
-	// }
-	for _, id := range ids {
-		for _, bar := range bars {
-			go maria.InsertUseIdAndBarSyncCh(c, id, bar, start)
-		}
-	}
-
-	// 处理 Ctrl + C
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-	<-sig
-	fmt.Println("In TestInsertUseIdAndBarSyncCh2(): Received interrupt signal, exiting...")
 }
