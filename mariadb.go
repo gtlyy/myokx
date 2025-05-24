@@ -363,7 +363,7 @@ func (mydb *MyMariaDBClass) CreateTradeGameData3(a bool, b bool, bar string) (r 
 		idsA = append(idsA, stock1)
 	}
 
-	idsB := []string{"DOGE-USDT-SWAP", "ETC-USDT-SWAP", "BTC-USDT-SWAP", "KAITO-USDT-SWAP", "TRUMP-USDT-SWAP"}
+	idsB := []string{"DOGE-USDT-SWAP", "ETH-USDT-SWAP", "BTC-USDT-SWAP", "KAITO-USDT-SWAP", "TRUMP-USDT-SWAP"}
 	idsAll := make([]string, 0)
 	if a && b {
 		idsAll = append(idsA, idsB...)
