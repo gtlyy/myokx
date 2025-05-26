@@ -161,3 +161,11 @@ func TestInsertUseIdAndBarSyncCh(t *testing.T) {
 	start := "-1" // -1:auto update, or Default: "2021-01-01T00:00:00Z"
 	maria.InsertUseIdAndBarSyncCh(c, id, bar, start)
 }
+
+func TestGetRowCount(t *testing.T) {
+	table := "000001SZ1D"
+	n, err := maria.GetRowCount(table)
+	assert.True(t, err == nil)
+	t.Log(n)
+	assert.True(t, n == 5738)
+}

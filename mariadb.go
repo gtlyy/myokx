@@ -121,6 +121,14 @@ func (mydb *MyMariaDBClass) Query(r interface{}, sql string) (err error) {
 	return mydb.db.Select(r, sql)
 }
 
+// 查：表的行数
+func (mydb *MyMariaDBClass) GetRowCount(table string) (int, error) {
+	var count int
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", table)
+	err := mydb.db.QueryRow(query).Scan(&count)
+	return count, err
+}
+
 // 查: 正向或反向(-1),查询n条数据
 func (mydb *MyMariaDBClass) QueryNum(r interface{}, table string, direct int, limit int) (err error) {
 	sql := `SELECT * FROM ` + table
@@ -354,7 +362,7 @@ func (mydb *MyMariaDBClass) CreateTradeGameData3(a bool, b bool, bar string) (r 
 	d := make(map[string]string)
 	idsA := make([]string, 0)
 	stockss, err := GetLinesCsv("stocks.csv", true)
-	IfError("Error: In CreateTradeGameData3(), Call GetLinesCsv(): ", err)
+	IfError("Error: In CreateTradeGameData3() 1, Call GetLinesCsv(): ", err)
 	for _, v := range stockss {
 		stock1 := v[0]
 		d[stock1] = v[1]
@@ -373,29 +381,47 @@ func (mydb *MyMariaDBClass) CreateTradeGameData3(a bool, b bool, bar string) (r 
 		idsAll = idsB
 	}
 
-	// 使用随机数生成索引来选择一个随机的 id
-	rand.Seed(time.Now().UnixNano())
-	randomIndex := rand.Intn(len(idsAll))
-	id := idsAll[randomIndex]
-	stock = id
+	n := 720
+	for i := 0; i < 5; i++ {
+		// 使用随机数生成索引来选择一个随机的 id
+		rand.Seed(time.Now().UnixNano())
+		randomIndex := rand.Intn(len(idsAll))
+		id := idsAll[randomIndex]
+		stock = id
 
-	// Big A or coin
-	suffix := "SH" // 上证
-	if id[0] >= '0' && id[0] <= '9' {
-		bar = "1D"
-		name = d[stock]
-		if id[0] == '0' || id[0] == '3' {
-			suffix = "SZ" // 深证
+		// Big A or coin
+		suffix := "SH" // 上证
+		if id[0] >= '0' && id[0] <= '9' {
+			bar = "1D"
+			name = d[stock]
+			if id[0] == '0' || id[0] == '3' {
+				suffix = "SZ" // 深证
+			}
+		} else {
+			suffix = "" // coin
 		}
-	} else {
-		suffix = "" // coin
+
+		table := IdAndBarToTable(stock+suffix, bar)
+		n2, err2 := mydb.GetRowCount(table)
+		// fmt.Println(n2)
+		if err2 != nil {
+			IfError("CreateTradeGameData3() 2", err)
+			return
+		}
+		if n2 < n {
+			err = fmt.Errorf("table: %s, rows: %d, need: %d", table, n2, n)
+			IfError("CreateTradeGameData3() 3", err)
+			continue
+		}
+
+		err = mydb.QueryRand(&r, table, n)
+		IfError("Error in CreateTradeGameData3() 4", err)
+		return
 	}
 
-	table := IdAndBarToTable(stock+suffix, bar)
-	n := 720
-	err = mydb.QueryRand(&r, table, n)
-	IfError("Error in CreateTradeGameData3()", err)
-
+	// 如果所有尝试均失败，返回错误或默认值
+	err = fmt.Errorf("无法找到数据量足够的表（需要至少 %d 条）", n)
+	IfError("CreateTradeGameData3() 5", err)
 	return
 }
 
