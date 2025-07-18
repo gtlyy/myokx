@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 
 	// "log"
 	"math/rand"
@@ -297,7 +298,11 @@ func (mydb *MyMariaDBClass) InsertUseIdAndBar(c *Client, id string, bar string, 
 
 // id := "DOGE-USDT-SWAP" bar := "1H"  --> table: DOGEUSDTSWAP1H
 func IdAndBarToTable(id, bar string) string {
-	return strings.Replace(id+bar, "-", "", -1)
+	table := strings.Replace(id+bar, "-", "", -1)
+	if runtime.GOOS == "windows" {
+		return strings.ToLower(table)
+	}
+	return table
 }
 
 // 生成测试数据
