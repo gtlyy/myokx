@@ -66,7 +66,7 @@ func TestDeleteNum(t *testing.T) {
 func TestQueryNum(t *testing.T) {
 	id := "KAITO-USDT-SWAP"
 	bar := "15m"
-	table := strings.Replace(id+bar, "-", "", -1)
+	table := IdAndBarToTable(id, bar)
 	var r []KlineDataS
 	n := 1000
 	err := maria.QueryNum(&r, table, -1, n)
@@ -83,7 +83,7 @@ func TestQueryStartEnd(t *testing.T) {
 	start := "2022-01-01T00:00:00.000Z"
 	id := "DOGE-USDT-SWAP"
 	bar := "1H"
-	table := strings.Replace(id+bar, "-", "", -1)
+	table := IdAndBarToTable(id, bar)
 	var r []KlineDataS
 	err := maria.QueryStartEnd(&r, table, start, end)
 	t.Log(TsToISOCST(r[0].Ts), TsToISOCST(r[len(r)-1].Ts))
@@ -110,11 +110,11 @@ func TestQuerySql(t *testing.T) {
 	var r1 []KlineDataS
 	var r2 []KlineDataS
 	n := 10
-	query1 := "SELECT ts FROM DOGEUSDTSWAP1H ORDER BY RAND() LIMIT 1"
+	query1 := "SELECT ts FROM dogeusdtswap1h ORDER BY RAND() LIMIT 1"
 	maria.Query(&r1, query1)
 	t.Log(r1[0].Ts)
 
-	query2 := "SELECT * FROM DOGEUSDTSWAP1H WHERE ts >= " + r1[0].Ts + " LIMIT " + IntToString(n)
+	query2 := "SELECT * FROM dogeusdtswap1h WHERE ts >= " + r1[0].Ts + " LIMIT " + IntToString(n)
 	maria.Query(&r2, query2)
 	t.Log(r2)
 }
@@ -126,13 +126,6 @@ func TestQueryRand(t *testing.T) {
 	bar := "1H"
 	table := IdAndBarToTable(id, bar)
 	n := 10
-	// query1 := "SELECT ts FROM DOGEUSDTSWAP1H ORDER BY RAND() LIMIT 1"
-	// maria.Query(&r, query1)
-	// t.Log(r[0].Ts)
-
-	// query2 := "SELECT * FROM DOGEUSDTSWAP1H WHERE ts >= " + r[0].Ts + " LIMIT " + IntToString(n)
-	// maria.Query(&r, query2)
-	// t.Log(r)
 
 	err := maria.QueryRand(&r, table, n)
 	assert.True(t, err == nil)
@@ -162,10 +155,53 @@ func TestInsertUseIdAndBarSyncCh(t *testing.T) {
 	maria.InsertUseIdAndBarSyncCh(c, id, bar, start)
 }
 
+// 测试：获取表的行数
 func TestGetRowCount(t *testing.T) {
-	table := "000001SZ1D"
+	table := "000001sz1d"
 	n, err := maria.GetRowCount(table)
 	assert.True(t, err == nil)
 	t.Log(n)
 	assert.True(t, n == 5738)
 }
+
+// 测试：将表名改为小写。
+// func TestRenameTableToLower(t *testing.T) {
+// 	maria.RenameTableToLower()
+// }
+
+// 测试：获取表名
+func TestGetTableNames(t *testing.T) {
+	tables, err := maria.getTableNames()
+	if err != nil {
+		t.Fatalf("getTableNames 执行失败: %v", err)
+	}
+
+	t.Logf("数据库 %s 共有 %d 个表", maria.dbName, len(tables))
+
+	if len(tables) > 0 {
+		t.Logf("第1-5个表名: %s", tables[0:5])
+	}
+}
+
+// 测试：修改表名
+// func TestRenameTableBase(t *testing.T) {
+// 	// 查看原来表名
+// 	tables, _ := maria.getTableNames()
+// 	t0 := tables[0]
+// 	t0_new := t0 + "FT"
+// 	fmt.Println("原来的表名：", t0)
+
+// 	// 修改表名
+// 	maria.renameTableBase(t0, t0_new)
+
+// 	// 查看修改后的表名
+// 	tables2, _ := maria.getTableNames()
+// 	fmt.Println("修改后的表名：", tables2[0])
+
+// 	//改回去
+// 	maria.renameTableBase(t0_new, t0)
+
+// 	// 再查看一下表名
+// 	tables3, _ := maria.getTableNames()
+// 	fmt.Println("再看看改回来没有：", tables3[0])
+// }

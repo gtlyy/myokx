@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"runtime"
 
 	// "log"
 	"math/rand"
@@ -38,23 +37,24 @@ func StructToMap(s interface{}) (d map[string]string) {
 
 // 构建 MyMariaDB 类
 type MyMariaDBClass struct {
-	db    *sqlx.DB
-	Table string
-	Sql   string
-	// DbName
+	db     *sqlx.DB
+	Table  string
+	Sql    string
+	dbName string // DbName
 }
 
 // 连接
-func (mydb *MyMariaDBClass) Connect(user, passwd, ip, port, d string) error {
-	uri := user + ":" + passwd + "@tcp(" + ip + ":" + port + ")" + "/" + d
+func (mydb *MyMariaDBClass) Connect(user, passwd, ip, port, dbName string) error {
+	uri := user + ":" + passwd + "@tcp(" + ip + ":" + port + ")" + "/" + dbName
 	db, err := sqlx.Open("mysql", uri)
 	mydb.db = db
+	mydb.dbName = dbName
 	return err
 }
 
 // 快速初始化
-func (mydb *MyMariaDBClass) Init(user, passwd, ip, port, db string) (err error) {
-	return mydb.Connect(user, passwd, ip, port, db)
+func (mydb *MyMariaDBClass) Init(user, passwd, ip, port, dbName string) (err error) {
+	return mydb.Connect(user, passwd, ip, port, dbName)
 }
 
 // 增
@@ -296,13 +296,11 @@ func (mydb *MyMariaDBClass) InsertUseIdAndBar(c *Client, id string, bar string, 
 	return err
 }
 
-// id := "DOGE-USDT-SWAP" bar := "1H"  --> table: DOGEUSDTSWAP1H
+// id := "DOGE-USDT-SWAP" bar := "1H"  --> table: DOGEUSDTSWAP1H --> dogeusdtswap1h
+// table 需要转为小写，为了跨平台。
 func IdAndBarToTable(id, bar string) string {
 	table := strings.Replace(id+bar, "-", "", -1)
-	if runtime.GOOS == "windows" {
-		return strings.ToLower(table)
-	}
-	return table
+	return strings.ToLower(table)
 }
 
 // 生成测试数据
@@ -626,3 +624,61 @@ func (mydb *MyMariaDBClass) InsertUseIdAndBarSyncCh(c *Client, id string, bar st
 	<-sig
 	fmt.Println("Received interrupt signal, exiting...")
 }
+
+// ====================================================== 修改表名 Start:
+// 辅助函数：获取数据库所有表名
+func (mydb *MyMariaDBClass) getTableNames() ([]string, error) {
+	query := "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?"
+	rows, err := mydb.db.Query(query, mydb.dbName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tables []string
+	for rows.Next() {
+		var table string
+		if err := rows.Scan(&table); err != nil {
+			return nil, err
+		}
+		tables = append(tables, table)
+	}
+
+	return tables, nil
+}
+
+// 修改表名
+func (mydb *MyMariaDBClass) renameTableBase(oldName, newName string) error {
+	query := fmt.Sprintf("RENAME TABLE `%s`.`%s` TO `%s`.`%s`",
+		mydb.dbName, oldName, mydb.dbName, newName)
+	_, err := mydb.db.Exec(query)
+	return err
+}
+
+// RenameTable 将数据库中所有表名转换为小写
+// 一次性函数
+func (mydb *MyMariaDBClass) RenameTableToLower() error {
+	// 1. 获取所有表名
+	tables, err := mydb.getTableNames()
+	if err != nil {
+		return fmt.Errorf("获取表名失败: %w", err)
+	}
+
+	// 2. 遍历并重命名每个表
+	for _, table := range tables {
+		lowerTable := strings.ToLower(table)
+
+		// 跳过已经是小写的表
+		if table == lowerTable {
+			continue
+		}
+
+		// 执行重命名
+		if err := mydb.renameTableBase(table, lowerTable); err != nil {
+			return fmt.Errorf("重命名 %s -> %s 失败: %w", table, lowerTable, err)
+		}
+	}
+	return nil
+}
+
+// ====================================================== 修改表名 End.
